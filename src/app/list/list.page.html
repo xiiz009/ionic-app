@@ -10,18 +10,48 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let item of items">
-      <ion-icon [name]="item.icon" slot="start"></ion-icon>
-      {{item.title}}
-      <div class="item-note" slot="end">
-        {{item.note}}
-      </div>
+  <ion-grid class="spinner" *ngIf="!products?.length">
+    <ion-row>
+      <ion-col>
+        <ion-progress-bar type="indeterminate"></ion-progress-bar>
+      </ion-col>
+    </ion-row>
+    <ion-row class="spinner__center">
+      <ion-col>
+        <ion-spinner name="bubbles" color="secondary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-progress-bar type="indeterminate" reversed="true"></ion-progress-bar>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-list *ngIf="products?.length">
+    <ion-item *ngFor="let product of products; trackBy: trackByFn">
+      <ion-card>
+        <ion-slides pager="true" [options]="slideOpts">
+          <ion-slide *ngFor="let productImage of product?.images">
+            <img src="{{ productImage.url }}" alt="">
+          </ion-slide>
+        </ion-slides>
+        <ion-card-header>
+          <ion-card-title class="product-title">{{ product?.name }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="product-desc">
+          {{ product?.description }}
+        </ion-card-content>
+        <ion-button (click)="addToCart(product?.sku)" color="primary">Add To Cart</ion-button>
+      </ion-card>
     </ion-item>
   </ion-list>
-  <!--
-    <div *ngIf="selectedItem" padding>
-      You navigated here from <b>{{selectedItem.title }}</b>
-    </div>
-  -->
+
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more products...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
 </ion-content>

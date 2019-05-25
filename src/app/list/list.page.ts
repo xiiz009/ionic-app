@@ -1,39 +1,51 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { ProductService } from '../services/product.service';
+import { IonInfiniteScroll } from '@ionic/angular';
 
 @Component({
   selector: 'app-list',
   templateUrl: 'list.page.html',
   styleUrls: ['list.page.scss']
 })
-export class ListPage implements OnInit {
-  private selectedItem: any;
-  private icons = [
-    'flask',
-    'wifi',
-    'beer',
-    'football',
-    'basketball',
-    'paper-plane',
-    'american-football',
-    'boat',
-    'bluetooth',
-    'build'
-  ];
-  public items: Array<{ title: string; note: string; icon: string }> = [];
-  constructor() {
-    for (let i = 1; i < 11; i++) {
-      this.items.push({
-        title: 'Item ' + i,
-        note: 'This is item #' + i,
-        icon: this.icons[Math.floor(Math.random() * this.icons.length)]
+
+export class ListPage {
+  @ViewChild(IonInfiniteScroll) ionInfiniteScroll: IonInfiniteScroll;
+  products: any;
+  slideOpts = {
+    initialSlide: 1,
+    speed: 400
+  };
+
+  pageProduct =  10;
+
+  constructor(private productService: ProductService ) {
+    this.productService.getPosts({ _page: this.pageProduct})
+      .subscribe(products => {
+        this.products = products;
       });
-    }
   }
 
-  ngOnInit() {
+  loadData(event) {
+    setTimeout(() => {
+      event.target.complete();
+      this.pageProduct = this.pageProduct + 10;
+      this.productService.getPosts({ _page: this.pageProduct})
+      .subscribe(products => {
+        const productsAlias = products;
+        productsAlias.forEach(product => {
+          this.products.push(product);
+        });
+      });
+      if (ProductService.length === 100) {
+        event.target.disable = true;
+      }
+    }, 1000);
   }
-  // add back when alpha.4 is out
-  // navigate(item) {
-  //   this.router.navigate(['/list', JSON.stringify(item)]);
-  // }
+
+  trackByFn(index) {
+    return index;
+  }
+  addToCart(id) {
+    console.log(id);
+  }
 }
